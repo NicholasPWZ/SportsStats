@@ -85,7 +85,7 @@ def player_stats(ide, torneio, season):
         pass
                 
 
-def last_games(ide, name):
+def last_games(ide, name = None):
     url = f'https://api.sofascore.com/api/v1/team/{ide}/events/last/0'
     html = requests.get(url, headers=header)
     json_data = json.loads(html.text)
@@ -112,6 +112,10 @@ def last_games(ide, name):
             except:
                 continue
             id_antigas = event.informar_partida(f'https://www.sofascore.com/{slug}/{custom_id}')
+        
+            
+            
+            
             url_antiga = f'https://api.sofascore.com/api/v1/event/{id_antigas[0]}/statistics'
             html = requests.get(url_antiga, headers=header)
             json_data_antiga = json.loads(html.text)
@@ -187,9 +191,12 @@ def last_games(ide, name):
                     else:
                         continue
         gols_soma = gols_feitos + gols_sofridos
-        print(f'\n{name} - Nas últimas {partidas_soma} Partidas -> escanteios: {escanteios_soma} / amarelos: {amarelos_soma} /  chutes: {chutes_soma} / impedimentos: {impedimentos_soma}\n '
-        f'Médias DO TIME : \n{escanteios_soma / partida_escanteios:.2f} Escanteios por jogo\n{amarelos_soma / partida_amarelos:.2f} Amarelos por jogo\n{chutes_soma / partida_chutes:.2f} Chutes por jogo\n{impedimentos_soma / partida_impedimentos:.2f} Impedimentos por jogo\n'
-        f'{name} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\nMédia de gols no primeiro tempo da partida: {gols_primeiro_soma / partidas_soma:.2f}')
+        print(f'\n{name} - Nas últimas {partidas_soma} Partidas \n'
+        f'{name} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n')
+        try:
+            print(f'Médias DO TIME : \n{escanteios_soma / partida_escanteios:.2f} Escanteios por jogo\n{amarelos_soma / partida_amarelos:.2f} Amarelos por jogo\n{chutes_soma / partida_chutes:.2f} Chutes por jogo\n{impedimentos_soma / partida_impedimentos:.2f} Impedimentos por jogo\n')
+        except:
+            pass
     except:
         pass
 
@@ -266,6 +273,9 @@ def ultimas_headtohead(url):
                     impedimentos_totais += int(y['away'])
         
         print('\n')
-    print(f'{hometeam} venceu {vitorias_casa} || {awayteam} venceu {vitorias_visitante} || Empatou {empates} vezes\n'
-          f'Médias nas partidas de: \nEscanteios: {escanteios_totais/ divisor_es:.2f}\nAmarelos: {amarelos_totais/ divisor_am:.2f}\nImpedimentos: {impedimentos_totais/ divisor_im:.2f}\nChutes: {chutes_totais/ divisor_ch:.2f}'
-          f'\nGols: {gols_totais / (vitorias_casa + vitorias_visitante + empates):.2f}')
+    print(f'{hometeam} venceu {vitorias_casa} || {awayteam} venceu {vitorias_visitante} || Empatou {empates} vezes\n')
+    try:
+        print(      f'Médias nas partidas de: \nEscanteios: {escanteios_totais/ divisor_es:.2f}\nAmarelos: {amarelos_totais/ divisor_am:.2f}\nImpedimentos: {impedimentos_totais/ divisor_im:.2f}\nChutes: {chutes_totais/ divisor_ch:.2f}')
+    except:
+          pass 
+    print(f'\nGols: {gols_totais / (vitorias_casa + vitorias_visitante + empates):.2f}')

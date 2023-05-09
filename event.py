@@ -2,6 +2,7 @@ import requests
 import json
 from bs4 import BeautifulSoup as bs
 
+
 header = {
     'accept': '*/*',
     'accept-language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -42,8 +43,13 @@ def dados_evento(num):
     homeslug = homeinfo['slug']
     homeid = homeinfo['id']
     awayslug = awayinfo['slug']
-    awayid = awayinfo['id'] 
-    return torneio, homename, awayname, homeslug, homeid, awayslug, awayid, torneioslug
+    awayid = awayinfo['id']
+    country = event['tournament']['category']['name']
+    try:
+        referee_id = event['referee']['id']
+        return torneio, homename, awayname, homeslug, homeid, awayslug, awayid, torneioslug, country ,referee_id
+    except:
+        return torneio, homename, awayname, homeslug, homeid, awayslug, awayid, torneioslug, country
 
 def sequencias(num, home, away):
     url =f'https://api.sofascore.com/api/v1/event/{num}/team-streaks'
@@ -81,3 +87,38 @@ def situacao(num):
                  'Time visitante:','Posição:',away_posicao,'Com', away_pontos,'Pts', away_last)
     except:
         pass
+
+def referee_last(id_juiz):
+    
+    url = f'https://api.sofascore.com/api/v1/referee/{id_juiz}/events/last/0'
+    html = requests.get(url,headers=header)
+    json_data = json.loads(html.text)
+    keys = json_data['events']
+
+    for i in keys:
+                
+        nome_torneio = i['tournament']['name']
+        slug, custom_id = i['slug'], i['customId']
+        time_casa = i['homeTeam']['name']
+        time_away = i['awayTeam']['name']
+        try:
+            gols_casa = i['homeScore']['display']
+            gols_away = i['awayScore']['display']
+        except:
+            continue
+        print('-' * 15,'\n',nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
+        
+        id_antigas = informar_partida(f'https://www.sofascore.com/{slug}/{custom_id}')
+
+
+        url_antiga = f'https://api.sofascore.com/api/v1/event/{id_antigas[0]}/statistics'
+        html = requests.get(url_antiga, headers=header)
+        json_data_antiga = json.loads(html.text)
+        try:
+            stats = json_data_antiga['statistics']
+        except:
+            continue
+        for x in stats[0]['groups']:
+            for y in x['statisticsItems']:
+                if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards'    :
+                    print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)

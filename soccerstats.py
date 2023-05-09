@@ -91,13 +91,14 @@ def info_soccerstats(nomedotime, torneio):
 #link = input('Informe a partida SoccerStats: ')
 #info_soccerstats(link)
 
-def get_url_match(time, torneio):
-    url = 'https://www.soccerstats.com/'
+def get_url_match(time, torneio, pais):
+
+    url = 'https://www.soccerstats.com/leagues.asp'
     html = requests.get(url).text
     soup = bs(html, 'html.parser')
     torneio = re.compile(torneio)
-    next_link = soup.find('a', class_='liveblognormal', text=torneio)
-    #next_link = soup.find('a', {"class": "liveblognormal", "text":torneio.strip()})
+    next_link = soup.find('font', color ='gray', string=torneio)
+    next_link = next_link.find_next('a')
     href = next_link['href']
 
     link_lastest = f'https://www.soccerstats.com/{href}'
@@ -108,7 +109,7 @@ def get_url_match(time, torneio):
     slug_match = tag_a_match['href']
 
     url = f'https://www.soccerstats.com/{slug_match}'
-    return(url)
+    return url
 
 
 #<a class='liveblognormal'
