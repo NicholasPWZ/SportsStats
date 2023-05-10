@@ -93,6 +93,7 @@ def last_games(ide, name = None):
         keys = json_data['events']
         gols_primeiro_soma, gols_soma, escanteios_soma, amarelos_soma, partidas_soma, chutes_soma, impedimentos_soma = 0, 0 ,0 ,0 ,0, 0, 0
         partida_escanteios, partida_amarelos, partida_impedimentos, partida_chutes, vitorias, empates, derrotas, gols_feitos, gols_sofridos = 0, 0, 0 ,0, 0, 0, 0, 0, 0
+        lista_escanteios, lista_gols, lista_amarelos,lista_escanteios_casa, lista_gols_casa, lista_escanteios_fora, lista_gols_fora,lista_gols_sofridos_casa, lista_gols_sofridos_fora  = [], [], [], [], [],[],[],[],[]
         for i in keys:
             
             nome_torneio = i['tournament']['name']
@@ -102,6 +103,13 @@ def last_games(ide, name = None):
             try:
                 gols_casa = i['homeScore']['display']
                 gols_away = i['awayScore']['display']
+                lista_gols.append(int(gols_casa) + int(gols_away))
+                if time_casa == name:
+                    lista_gols_casa.append(gols_casa)
+                    lista_gols_sofridos_casa.append(gols_away)
+                else:
+                    lista_gols_fora.append(gols_away)
+                    lista_gols_sofridos_fora.append(gols_casa)
             except:
                 continue
             try:
@@ -151,54 +159,57 @@ def last_games(ide, name = None):
                         
                         print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
 
-                        if time_casa == name:
-                            if y['name'] == 'Corner kicks':
-                                partida_escanteios += 1
+                       
+                        if y['name'] == 'Corner kicks':
+                            partida_escanteios += 1
+                            if time_casa == name:
                                 escanteios_soma += int(y['home'])
-                                
-                            elif y['name'] == 'Yellow cards':
-                                partida_amarelos += 1
-                                amarelos_soma += int(y['home'])
-                                                    
-                            elif y['name'] == 'Total shots':
-                                partida_chutes += 1
-                                chutes_soma += int(y['home'])  
-                                
-                            elif y['name'] == 'Offsides':
-                                partida_impedimentos += 1
-                                impedimentos_soma += int(y['home'])
-                            
-                        else:
-                            if y['name'] == 'Corner kicks':
-                                partida_escanteios += 1
+                                lista_escanteios_casa.append(int(y['home']))
+                            else:
                                 escanteios_soma += int(y['away'])
+                                lista_escanteios_fora.append(int(y['away']))
+                            lista_escanteios.append(int(y['home']) + int(y['away']))
                                 
-                                                    
-                            elif y['name'] == 'Yellow cards':
-                                partida_amarelos += 1
+                        elif y['name'] == 'Yellow cards':
+                            partida_amarelos += 1
+                            if time_casa == name:
+                                amarelos_soma += int(y['home'])
+                            else:
                                 amarelos_soma += int(y['away'])
-                                
+                            lista_amarelos.append(int(y['home']) + int(y['away']))
                                                     
-                            elif y['name'] == 'Total shots':
-                                partida_chutes += 1
+                        elif y['name'] == 'Total shots':
+                            partida_chutes += 1
+                            if time_casa == name:
+                                chutes_soma += int(y['home'])
+                            else:
                                 chutes_soma += int(y['away'])
                                 
-                                                    
-                            elif y['name'] == 'Offsides':
-                                partida_impedimentos += 1
+                        elif y['name'] == 'Offsides':
+                            partida_impedimentos += 1
+                            if time_casa == name:
+                                impedimentos_soma += int(y['home'])
+                            else:
                                 impedimentos_soma += int(y['away'])
-                                
+                            
                     else:
                         continue
-        gols_soma = gols_feitos + gols_sofridos
-        print(f'\n{name} - Nas últimas {partidas_soma} Partidas \n'
-        f'{name} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n')
-        try:
-            print(f'Médias DO TIME : \n{escanteios_soma / partida_escanteios:.2f} Escanteios por jogo\n{amarelos_soma / partida_amarelos:.2f} Amarelos por jogo\n{chutes_soma / partida_chutes:.2f} Chutes por jogo\n{impedimentos_soma / partida_impedimentos:.2f} Impedimentos por jogo\n')
-        except:
-            pass
+    except:
+        pass              
+    gols_soma = gols_feitos + gols_sofridos
+    print(f'\n{name} - Nas últimas {partidas_soma} Partidas \n'
+    f'{name} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n')
+    try:
+        print(f'Médias DO TIME : \n{escanteios_soma / partida_escanteios:.2f} Escanteios por jogo\n{amarelos_soma / partida_amarelos:.2f} Amarelos por jogo\n{chutes_soma / partida_chutes:.2f} Chutes por jogo\n{impedimentos_soma / partida_impedimentos:.2f} Impedimentos por jogo\n')
     except:
         pass
+    print(f'Número de ESCANTEIOS nas ultimas partidas: {lista_escanteios}\nNúmero de GOLS nas ultimas partidas: {lista_gols}\nNúmero de CARTÕES AMARELOS nas ultimas partidas: {lista_amarelos}')
+    
+    print(f'Número de ESCANTEIOS do time em casa: {lista_escanteios_casa}\nNúmero de GOLS do time em casa: {lista_gols_casa}\nNúmero de GOLS SOFRIDOS do time em casa: {lista_gols_sofridos_casa}')
+            
+    print(f'Número de ESCANTEIOS do time fora: {lista_escanteios_fora}\nNúmero de GOLS do time fora: {lista_gols_fora}\nNúmero de GOLS SOFRIDOS do time fora: {lista_gols_sofridos_fora}')
+    
+    
 
 
 def ultimas_headtohead(url):
@@ -278,4 +289,5 @@ def ultimas_headtohead(url):
         print(      f'Médias nas partidas de: \nEscanteios: {escanteios_totais/ divisor_es:.2f}\nAmarelos: {amarelos_totais/ divisor_am:.2f}\nImpedimentos: {impedimentos_totais/ divisor_im:.2f}\nChutes: {chutes_totais/ divisor_ch:.2f}')
     except:
           pass 
-    print(f'\nGols: {gols_totais / (vitorias_casa + vitorias_visitante + empates):.2f}')
+    print(
+        f'\nGols: {gols_totais / (vitorias_casa + vitorias_visitante + empates):.2f}')
