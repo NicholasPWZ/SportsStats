@@ -37,7 +37,8 @@ except:
     pass
 
 print('\n')
-
+if torneio == 'Brasileiro Série A':
+    torneio = 'Serie A'
 try:
     soccerstats.info_soccerstats(hometeam, torneio, country)
 except:

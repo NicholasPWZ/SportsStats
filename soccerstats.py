@@ -2,23 +2,41 @@ import requests
 import re
 from bs4 import BeautifulSoup as bs
 
-def info_soccerstats(nomedotime, torneio):
-    url = get_url_match(nomedotime, torneio)
+def info_soccerstats(nomedotime, torneio, pais):
+    url = get_url_match(nomedotime, torneio, pais)
     html = requests.get(url).text
     soup = bs(html, 'html.parser')
     list_tags = []
     tag_h2 = soup.find('h2', string='Corner statistics')
-    list_tags.append(tag_h2)
+    if tag_h2 == None:
+       pass
+    else: 
+        list_tags.append(tag_h2)
     tag_h2 = soup.find('h2', string='Goal statistics')
-    list_tags.append(tag_h2)
+    if tag_h2 == None:
+       pass
+    else: 
+        list_tags.append(tag_h2)
     tag_h2 = soup.find('h2', string='Scoring rates')
-    list_tags.append(tag_h2)
+    if tag_h2 == None:
+       pass
+    else: 
+        list_tags.append(tag_h2)
     tag_h2 = soup.find('h2', string='Goals scored / Goals conceded')
-    list_tags.append(tag_h2)
+    if tag_h2 == None:
+       pass
+    else: 
+        list_tags.append(tag_h2)
     tag_h2 = soup.find('h2', string='Match total goals')
-    list_tags.append(tag_h2)
+    if tag_h2 == None:
+       pass
+    else: 
+        list_tags.append(tag_h2)
     tag_h2 = soup.find('h2', string='Current Streaks & Sequences')
-    list_tags.append(tag_h2)
+    if tag_h2 == None:
+       pass
+    else: 
+        list_tags.append(tag_h2)
     
     
 
@@ -92,15 +110,15 @@ def info_soccerstats(nomedotime, torneio):
 #info_soccerstats(link)
 
 def get_url_match(time, torneio, pais):
-
+    
+    pais = pais.lower()
     url = 'https://www.soccerstats.com/leagues.asp'
     html = requests.get(url).text
     soup = bs(html, 'html.parser')
-    torneio = re.compile(torneio)
-    next_link = soup.find('font', color ='gray', string=torneio)
-    next_link = next_link.find_next('a')
-    href = next_link['href']
-
+    torneio = re.compile(pais)
+    tag = soup.find('a', class_='vsmall', attrs={'href':torneio})
+    href = tag['href']
+    
     link_lastest = f'https://www.soccerstats.com/{href}'
     nome_time = re.compile(time)
     html = requests.get(link_lastest).text
@@ -112,4 +130,3 @@ def get_url_match(time, torneio, pais):
     return url
 
 
-#<a class='liveblognormal'
