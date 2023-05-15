@@ -93,20 +93,16 @@ def referee_last(id_juiz):
     url = f'https://api.sofascore.com/api/v1/referee/{id_juiz}/events/last/0'
     html = requests.get(url,headers=header)
     json_data = json.loads(html.text)
+    partidas = 0
+    lista_gols, lista_cartao = [], []
     keys = json_data['events']
 
     for i in keys:
-                
-        nome_torneio = i['tournament']['name']
+        partidas += 1     
         slug, custom_id = i['slug'], i['customId']
-        time_casa = i['homeTeam']['name']
-        time_away = i['awayTeam']['name']
-        try:
-            gols_casa = i['homeScore']['display']
-            gols_away = i['awayScore']['display']
-        except:
-            continue
-        print('-' * 15,'\n',nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
+        gols_casa = i['homeScore']['display']
+        gols_away = i['awayScore']['display']
+        lista_gols.append(int(gols_away)+ int(gols_casa))
         
         id_antigas = informar_partida(f'https://www.sofascore.com/{slug}/{custom_id}')
 
@@ -120,5 +116,11 @@ def referee_last(id_juiz):
             continue
         for x in stats[0]['groups']:
             for y in x['statisticsItems']:
-                if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards'    :
-                    print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
+                if y['name'] == 'Yellow cards':
+                    lista_cartao.append(int(y['home'])+ int(y['away']))
+    x = 0
+    print(f'\nPartidas: {partidas}')
+    for i in range(8):
+        contador =lista_cartao.count(x) + sum(1 for numero in lista_cartao if numero > x)
+        print(f'-> acima de {x} amarelos: {contador}')
+        x += 1

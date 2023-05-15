@@ -106,7 +106,7 @@ def last_games(ide, time, home):
             try:
                 gols_casa = i['homeScore']['display']
                 gols_away = i['awayScore']['display']
-                lista_gols.append(int(gols_casa) + int(gols_away))
+               
                 if time_casa == time:
                     partidas_casa+=1
                     lista_gols_casa.append(int(gols_casa))
@@ -158,7 +158,7 @@ def last_games(ide, time, home):
                     empates += 1
                 if gols_away < gols_casa:
                     derrotas += 1
-            
+            lista_gols.append(int(gols_casa) + int(gols_away))
             #print('-' * 15,'\n',nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
                     
             for x in stats[0]['groups']:
@@ -342,7 +342,7 @@ def ultimas_headtohead(url):
                     impedimentos_totais += int(y['home'])
                     impedimentos_totais += int(y['away'])
         
-        print('\n')
+        #print('\n')
     print(f'{hometeam} venceu {vitorias_casa} || {awayteam} venceu {vitorias_visitante} || Empatou {empates} vezes\n')
     
     try:
