@@ -32,12 +32,12 @@ except:
 try:
     punterspage.get_probs(slug_punterspage)
     print('\n')
-    punterspage.get_ocorrencies(slug_punterspage)
+    #punterspage.get_ocorrencies(slug_punterspage)
 except:
     pass
 
 print('\n')
-if torneio == 'Brasileiro Série A':
+if torneio == 'Brasileirão Série A':
     torneio = 'Serie A'
 try:
     soccerstats.info_soccerstats(hometeam, torneio, country)
@@ -77,15 +77,17 @@ print('\n')
 
 print('-' * 20,'ULTIMOS JOGOS','-' * 20)
 
-print(hometeam, 'Jogos mais recentes por último')
+print(hometeam)
+#print('Jogos mais recentes por último')
 
-team.last_games(homeid, hometeam)
+team.last_games(homeid, hometeam, hometeam)
 
 print('-' * 20)
 
-print(awayteam, 'Jogos mais recentes por último')
+print(awayteam )
+#print('Jogos mais recentes por último')
 
-team.last_games(awayid, awayteam)
+team.last_games(awayid, awayteam, hometeam)
 
 print('\n')
 

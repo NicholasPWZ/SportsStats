@@ -34,9 +34,12 @@ def estatisticas(ide, torneio, season):
         corners_contra = statistics['cornersAgainst']
         impedimentos = statistics['offsides']
         impedimentos_adv = statistics['offsidesAgainst']
+        cruzamentos = statistics['totalCrosses']
+        cruzamentos_adv = statistics['crossesTotalAgainst']
         print(f'{partidas} Partidas jogadas\n{gols_favor / partidas:.2f} Média de gols marcados\n{gols_contra / partidas:.2f} Média de gols cedidos\n{finalizacoes / partidas:.2f} Finalizações por jogo\n{fin_gol / partidas:.2f} Chutes a gol por jogo\n'
 f'{corners_favor / partidas:.2f} Escanteios por jogo\n{corners_contra / partidas:.2f} Escanteios cedidos por jogo\n{(corners_favor / partidas) + (corners_contra / partidas):.2f} Escanteios na partida\n{amarelos / partidas:.2f} Cartões amarelos por jogo'
-f'\n{amarelos_adv / partidas:.2f} Cartões amarelos do adversário por jogo\n{impedimentos / partidas:.2f} Impedimentos por jogo\n{impedimentos_adv / partidas:.2f} Impedimentos do adversário por jogo')
+f'\n{amarelos_adv / partidas:.2f} Cartões amarelos do adversário por jogo\n{impedimentos / partidas:.2f} Impedimentos por jogo\n{impedimentos_adv / partidas:.2f} Impedimentos do adversário por jogo'
+f'\n{cruzamentos / partidas:.2f} Cruzamentos por jogo\n{cruzamentos_adv / partidas:.2f} Cruzamentos cedidos por jogo')
     except:
         pass
 
@@ -85,15 +88,15 @@ def player_stats(ide, torneio, season):
         pass
                 
 
-def last_games(ide, name = None):
+def last_games(ide, time, home):
     url = f'https://api.sofascore.com/api/v1/team/{ide}/events/last/0'
     html = requests.get(url, headers=header)
     json_data = json.loads(html.text)
     try: 
         keys = json_data['events']
-        gols_primeiro_soma, gols_soma, escanteios_soma, amarelos_soma, partidas_soma, chutes_soma, impedimentos_soma = 0, 0 ,0 ,0 ,0, 0, 0
+        partidas_casa, partidas_fora, gols_primeiro_soma, gols_soma, escanteios_soma, amarelos_soma, partidas_soma, chutes_soma, impedimentos_soma = 0, 0 ,0 ,0 ,0, 0, 0,0, 0
         partida_escanteios, partida_amarelos, partida_impedimentos, partida_chutes, vitorias, empates, derrotas, gols_feitos, gols_sofridos = 0, 0, 0 ,0, 0, 0, 0, 0, 0
-        lista_escanteios, lista_gols, lista_amarelos,lista_escanteios_casa, lista_gols_casa, lista_escanteios_fora, lista_gols_fora,lista_gols_sofridos_casa, lista_gols_sofridos_fora  = [], [], [], [], [],[],[],[],[]
+        lista_escanteios, lista_gols, lista_amarelos,lista_escanteios_casa, lista_gols_casa, lista_escanteios_fora, lista_gols_fora,lista_gols_sofridos_casa, lista_gols_sofridos_fora  = [], [], [],[],[],[],[],[],[]
         for i in keys:
             
             nome_torneio = i['tournament']['name']
@@ -104,12 +107,17 @@ def last_games(ide, name = None):
                 gols_casa = i['homeScore']['display']
                 gols_away = i['awayScore']['display']
                 lista_gols.append(int(gols_casa) + int(gols_away))
-                if time_casa == name:
-                    lista_gols_casa.append(gols_casa)
-                    lista_gols_sofridos_casa.append(gols_away)
+                if time_casa == time:
+                    partidas_casa+=1
+                    lista_gols_casa.append(int(gols_casa))
+                    lista_gols_sofridos_casa.append(int(gols_away))
+                    
+
                 else:
-                    lista_gols_fora.append(gols_away)
-                    lista_gols_sofridos_fora.append(gols_casa)
+                    partidas_fora+=1
+                    lista_gols_fora.append(int(gols_away))
+                    lista_gols_sofridos_fora.append(int(gols_casa))
+                    
             except:
                 continue
             try:
@@ -132,7 +140,7 @@ def last_games(ide, name = None):
             except:
                 continue
             partidas_soma += 1
-            if time_casa == name:
+            if time_casa == time:
                 gols_feitos += gols_casa
                 gols_sofridos += gols_away
                 if gols_casa > gols_away:
@@ -141,7 +149,7 @@ def last_games(ide, name = None):
                     empates += 1
                 if gols_away > gols_casa:
                     derrotas += 1
-            elif time_away == name:
+            elif time_away == time:
                 gols_feitos += gols_away
                 gols_sofridos += gols_casa
                 if gols_casa < gols_away:
@@ -151,28 +159,28 @@ def last_games(ide, name = None):
                 if gols_away < gols_casa:
                     derrotas += 1
             
-            print('-' * 15,'\n',nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
+            #print('-' * 15,'\n',nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
                     
             for x in stats[0]['groups']:
                 for y in x['statisticsItems']:
                     if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards' or y['name'] == 'Total shots' or y['name'] == 'Offsides':
                         
-                        print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
+                        #print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
 
                        
                         if y['name'] == 'Corner kicks':
                             partida_escanteios += 1
-                            if time_casa == name:
-                                escanteios_soma += int(y['home'])
+                            if time_casa == time:
+                                
                                 lista_escanteios_casa.append(int(y['home']))
                             else:
-                                escanteios_soma += int(y['away'])
+                                
                                 lista_escanteios_fora.append(int(y['away']))
                             lista_escanteios.append(int(y['home']) + int(y['away']))
                                 
                         elif y['name'] == 'Yellow cards':
                             partida_amarelos += 1
-                            if time_casa == name:
+                            if time_casa == time:
                                 amarelos_soma += int(y['home'])
                             else:
                                 amarelos_soma += int(y['away'])
@@ -180,14 +188,14 @@ def last_games(ide, name = None):
                                                     
                         elif y['name'] == 'Total shots':
                             partida_chutes += 1
-                            if time_casa == name:
+                            if time_casa == time:
                                 chutes_soma += int(y['home'])
                             else:
                                 chutes_soma += int(y['away'])
                                 
                         elif y['name'] == 'Offsides':
                             partida_impedimentos += 1
-                            if time_casa == name:
+                            if time_casa == time:
                                 impedimentos_soma += int(y['home'])
                             else:
                                 impedimentos_soma += int(y['away'])
@@ -197,19 +205,70 @@ def last_games(ide, name = None):
     except:
         pass              
     gols_soma = gols_feitos + gols_sofridos
-    print(f'\n{name} - Nas últimas {partidas_soma} Partidas \n'
-    f'{name} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n')
-    try:
-        print(f'Médias DO TIME : \n{escanteios_soma / partida_escanteios:.2f} Escanteios por jogo\n{amarelos_soma / partida_amarelos:.2f} Amarelos por jogo\n{chutes_soma / partida_chutes:.2f} Chutes por jogo\n{impedimentos_soma / partida_impedimentos:.2f} Impedimentos por jogo\n')
-    except:
-        pass
-    print(f'Número de ESCANTEIOS nas ultimas partidas: {lista_escanteios}\nNúmero de GOLS nas ultimas partidas: {lista_gols}\nNúmero de CARTÕES AMARELOS nas ultimas partidas: {lista_amarelos}')
+    print(f'\n{time} - Nas últimas {partidas_soma} Partidas \n'
+    f'{time} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n\nPartidas do time: {partidas_soma} ')
+    x = 0.5
+    for i in range(5):
+        contador = lista_gols.count(x) + sum(1 for numero in lista_gols if numero > x)
+        print(f'-> acima de {x} gols: {contador}')
+        x += 1
+ 
+    print('-' * 20)
+
+    x = 6
+    for i in range(9):
+        contador =lista_escanteios.count(x) + sum(1 for numero in lista_escanteios if numero > x)
+        print(f'-> acima de {x} escanteios: {(contador * 100) / partida_escanteios:.2f}% ({contador})')
+        x += 1 
+   
+    print('-' * 20)
+
+    x = 0
+    for i in range(8):
+        contador =lista_amarelos.count(x) + sum(1 for numero in lista_amarelos if numero > x)
+        print(f'-> acima de {x} amarelos: {contador}')
+        x += 1
     
-    print(f'Número de ESCANTEIOS do time em casa: {lista_escanteios_casa}\nNúmero de GOLS do time em casa: {lista_gols_casa}\nNúmero de GOLS SOFRIDOS do time em casa: {lista_gols_sofridos_casa}')
-            
-    print(f'Número de ESCANTEIOS do time fora: {lista_escanteios_fora}\nNúmero de GOLS do time fora: {lista_gols_fora}\nNúmero de GOLS SOFRIDOS do time fora: {lista_gols_sofridos_fora}')
+    #print(f'Número de ESCANTEIOS nas ultimas partidas: {lista_escanteios}\nNúmero de GOLS nas ultimas partidas: {lista_gols}\nNúmero de CARTÕES AMARELOS nas ultimas partidas: {lista_amarelos}')
     
     
+    if time == home:
+        #print(f'Número de ESCANTEIOS do time em casa: {lista_escanteios_casa}\nNúmero de GOLS do time em casa: {lista_gols_casa}\nNúmero de GOLS SOFRIDOS do time em casa: {lista_gols_sofridos_casa}')
+        
+        print(f'\nPartidas do time em casa: {partidas_casa}\nGOLS MARCADOS:')
+        
+        x = 0.5
+        for i in range(5):
+            contador =lista_gols_casa.count(x) + sum(1 for numero in lista_gols_casa if numero > x)
+            print(f'-> acima de {x} gols: {contador}')
+            x += 1
+        
+        print('\nGOLS SOFRIDOS:')
+        
+        x = 0.5
+        for i in range(5):        
+            contador =lista_gols_sofridos_casa.count(x) + sum(1 for numero in lista_gols_sofridos_casa if numero > x)
+            print(f'-> acima de {x} gols: {contador}')
+            x+=1
+        
+    else:
+        #print(f'Número de ESCANTEIOS do time fora: {lista_escanteios_fora}\nNúmero de GOLS do time fora: {lista_gols_fora}\nNúmero de GOLS SOFRIDOS do time fora: {lista_gols_sofridos_fora}')
+        
+        print(f'\nPartidas do time fora: {partidas_fora}\nGOLS MARCADOS')
+        
+        x = 0.5
+        for i in range(5):
+            contador =lista_gols_fora.count(x) + sum(1 for numero in lista_gols_fora if numero > x)
+            print(f'-> acima de {x} gols: {contador}')
+            x+=1
+
+        print('\nGOLS SOFRIDOS:')
+
+        x = 0.5
+        for i in range(5):
+            contador =lista_gols_sofridos_fora.count(x) + sum(1 for numero in lista_gols_sofridos_fora if numero > x)
+            print(f'-> acima de {x} gols: {contador}')
+            x+=1
 
 
 def ultimas_headtohead(url):
@@ -254,37 +313,38 @@ def ultimas_headtohead(url):
             stats = json_dict['statistics']
         except:
             continue
-        print(f"{time_casa}: {gols_casa} X {gols_fora}: {time_fora}")
+        #print(f"{time_casa}: {gols_casa} X {gols_fora}: {time_fora}")
         for x in stats[0]['groups']:
             for y in x['statisticsItems']:
                 if y['name'] == 'Corner kicks'   :
-                    print (f"{y['name']}---{time_casa} {y['home']} X {y['away']} {time_fora} ")
+                    #print (f"{y['name']}---{time_casa} {y['home']} X {y['away']} {time_fora} ")
                     divisor_es += 1
                     escanteios_totais += int(y['home'])
                     escanteios_totais += int(y['away'])
 
                 if y['name'] == 'Yellow cards':
-                    print (f"{y['name']}---{time_casa} {y['home']} X {y['away']} {time_fora} ")
+                    #print (f"{y['name']}---{time_casa} {y['home']} X {y['away']} {time_fora} ")
                     divisor_am += 1
                     amarelos_totais += int(y['home'])
                     amarelos_totais += int(y['away'])
 
 
                 if y['name'] == 'Total shots':
-                    print (f"{y['name']}---{time_casa} {y['home']} x {y['away']} {time_fora} ")
+                    #print (f"{y['name']}---{time_casa} {y['home']} x {y['away']} {time_fora} ")
                     divisor_ch += 1
                     chutes_totais += int(y['home'])
                     chutes_totais += int(y['away'])
 
 
                 if y['name'] == 'Offsides':
-                    print (f"{y['name']}---{time_casa} {y['home']} X {y['away']} {time_fora} ")
+                    #print (f"{y['name']}---{time_casa} {y['home']} X {y['away']} {time_fora} ")
                     divisor_im +=1
                     impedimentos_totais += int(y['home'])
                     impedimentos_totais += int(y['away'])
         
         print('\n')
     print(f'{hometeam} venceu {vitorias_casa} || {awayteam} venceu {vitorias_visitante} || Empatou {empates} vezes\n')
+    
     try:
         print(      f'Médias nas partidas de: \nEscanteios: {escanteios_totais/ divisor_es:.2f}\nAmarelos: {amarelos_totais/ divisor_am:.2f}\nImpedimentos: {impedimentos_totais/ divisor_im:.2f}\nChutes: {chutes_totais/ divisor_ch:.2f}')
     except:
