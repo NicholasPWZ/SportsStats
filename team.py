@@ -94,9 +94,11 @@ def last_games(ide, time, home):
     json_data = json.loads(html.text)
     try: 
         keys = json_data['events']
-        partidas_casa, partidas_fora, gols_primeiro_soma, gols_soma, escanteios_soma, amarelos_soma, partidas_soma, chutes_soma, impedimentos_soma = 0, 0 ,0 ,0 ,0, 0, 0,0, 0
-        partida_escanteios, partida_amarelos, partida_impedimentos, partida_chutes, vitorias, empates, derrotas, gols_feitos, gols_sofridos = 0, 0, 0 ,0, 0, 0, 0, 0, 0
+        partidas_cruz_casa, partidas_cruz_fora, partidas_casa, partidas_fora, gols_soma, escanteios_soma, amarelos_soma, partidas_soma, chutes_soma, impedimentos_soma = 0, 0 ,0 ,0 ,0, 0, 0,0,0,0
+        partida_cruzamentos,partida_escanteios, partida_amarelos, partida_impedimentos, partida_chutes, vitorias, empates, derrotas, gols_feitos, gols_sofridos = 0, 0, 0 ,0, 0, 0, 0, 0, 0,0
         lista_escanteios, lista_gols, lista_amarelos,lista_escanteios_casa, lista_gols_casa, lista_escanteios_fora, lista_gols_fora,lista_gols_sofridos_casa, lista_gols_sofridos_fora  = [], [], [],[],[],[],[],[],[]
+        lista_cruzamentos_favor, lista_cruzamentos_contra, lista_escanteios_casa_contra, lista_escanteios_fora_contra, lista_cruzamentos_casa_favor,lista_cruzamentos_casa_contra = [], [], [], [],[],[]
+        lista_cruzamentos_fora_favor, lista_cruzamentos_fora_contra = [], []
         for i in keys:
             
             nome_torneio = i['tournament']['name']
@@ -120,18 +122,7 @@ def last_games(ide, time, home):
                     
             except:
                 continue
-            try:
-                gols_casa_tempo = i['homeScore']['period1']
-                gols_away_tempo = i['awayScore']['period1']
-                gols_primeiro_soma += gols_casa_tempo + gols_away_tempo
-                
-            except:
-                continue
             id_antigas = event.informar_partida(f'https://www.sofascore.com/{slug}/{custom_id}')
-        
-            
-            
-            
             url_antiga = f'https://api.sofascore.com/api/v1/event/{id_antigas[0]}/statistics'
             html = requests.get(url_antiga, headers=header)
             json_data_antiga = json.loads(html.text)
@@ -163,19 +154,38 @@ def last_games(ide, time, home):
                     
             for x in stats[0]['groups']:
                 for y in x['statisticsItems']:
-                    if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards' or y['name'] == 'Total shots' or y['name'] == 'Offsides':
+                    if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards' or y['name'] == 'Total shots' or y['name'] == 'Offsides' or y['name'] =='Crosses':
                         
                         #print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
+                        if y['name'] =='Crosses':
+                            partida_cruzamentos += 1
+                            numc = y['home'].split('/')
+                            numc = numc[1].split('(')
+                            numf = y['away'].split('/')
+                            numf = numf[1].split('(')
+                            if time_casa == time:
+                                partidas_cruz_casa += 1                         
+                                lista_cruzamentos_casa_favor.append(int(numc[0]))
+                                lista_cruzamentos_casa_contra.append(int(numf[0]))
+                                lista_cruzamentos_favor.append(int(numc[0]))
+                                lista_cruzamentos_contra.append(int(numf[0]))
+                            else:
+                                partidas_cruz_fora += 1
+                                lista_cruzamentos_fora_favor.append(int(numf[0]))
+                                lista_cruzamentos_fora_contra.append(int(numc[0]))
+                                lista_cruzamentos_favor.append(int(numf[0]))
+                                lista_cruzamentos_contra.append(int(numc[0]))
 
                        
-                        if y['name'] == 'Corner kicks':
+                        elif y['name'] == 'Corner kicks':
                             partida_escanteios += 1
                             if time_casa == time:
-                                
+                                lista_escanteios_casa_contra.append(int(y['away']))
                                 lista_escanteios_casa.append(int(y['home']))
                             else:
                                 
                                 lista_escanteios_fora.append(int(y['away']))
+                                lista_escanteios_fora_contra.append(int(y['home']))
                             lista_escanteios.append(int(y['home']) + int(y['away']))
                                 
                         elif y['name'] == 'Yellow cards':
@@ -207,6 +217,11 @@ def last_games(ide, time, home):
     gols_soma = gols_feitos + gols_sofridos
     print(f'\n{time} - Nas últimas {partidas_soma} Partidas \n'
     f'{time} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n\nPartidas do time: {partidas_soma} ')
+    print(f'Cruzamentos do time: {lista_cruzamentos_favor}\nCruzamentos CONTRA: {lista_cruzamentos_contra}')
+    soma_cruza_favor, soma_cruza_contra = sum(lista_cruzamentos_favor), sum(lista_cruzamentos_contra)
+    soma_esc_favor, soma_esc_contra = sum(lista_escanteios_casa) + sum(lista_escanteios_fora), sum(lista_escanteios_casa_contra) + sum(lista_escanteios_fora_contra) 
+    print(f'Cruzamentos do time necessarios para um escanteio: {soma_cruza_favor / soma_esc_favor:.2f} ({soma_cruza_favor / partida_cruzamentos:.2f} Cruzamentos por jogo) -> {float(soma_cruza_favor / partida_cruzamentos) / float(soma_cruza_favor / soma_esc_favor):.2f}\n'
+          f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {soma_cruza_contra / soma_esc_contra:.2f} ({soma_cruza_contra / partida_cruzamentos:.2f} Cruzamentos por jogo) -> {float(soma_cruza_contra / partida_cruzamentos) / float(soma_cruza_contra / soma_esc_contra):.2f}')
     x = 0.5
     for i in range(5):
         contador = lista_gols.count(x) + sum(1 for numero in lista_gols if numero > x)
@@ -233,10 +248,19 @@ def last_games(ide, time, home):
     
     
     if time == home:
+        print(f'\nPartidas do time em casa: {partidas_casa}')
         #print(f'Número de ESCANTEIOS do time em casa: {lista_escanteios_casa}\nNúmero de GOLS do time em casa: {lista_gols_casa}\nNúmero de GOLS SOFRIDOS do time em casa: {lista_gols_sofridos_casa}')
+        soma_cruza_favor, soma_cruza_contra = sum(lista_cruzamentos_casa_favor), sum(lista_cruzamentos_casa_contra)
+        soma_esc_favor, soma_esc_contra = sum(lista_escanteios_casa) , sum(lista_escanteios_casa_contra)
         
-        print(f'\nPartidas do time em casa: {partidas_casa}\nGOLS MARCADOS:')
+        print(f'Cruzamentos do time necessarios para um escanteio: {soma_cruza_favor / soma_esc_favor:.2f} ({soma_cruza_favor / partidas_cruz_casa:.2f} Cruzamentos por jogo) -> {float(soma_cruza_favor / partidas_cruz_casa) / float(soma_cruza_favor / soma_esc_favor):.2f}\n'
+          f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {soma_cruza_contra / soma_esc_contra:.2f} ({soma_cruza_contra / partidas_cruz_casa:.2f} Cruzamentos por jogo) -> {float(soma_cruza_contra / partidas_cruz_casa) / float(soma_cruza_contra / soma_esc_contra):.2f}')
+
+
+
+
         
+        print('\nGOLS MARCADOS:')
         x = 0.5
         for i in range(5):
             contador =lista_gols_casa.count(x) + sum(1 for numero in lista_gols_casa if numero > x)
@@ -251,10 +275,15 @@ def last_games(ide, time, home):
             print(f'-> acima de {x} gols: {contador}')
             x+=1
         
-    else:
-        #print(f'Número de ESCANTEIOS do time fora: {lista_escanteios_fora}\nNúmero de GOLS do time fora: {lista_gols_fora}\nNúmero de GOLS SOFRIDOS do time fora: {lista_gols_sofridos_fora}')
-        
-        print(f'\nPartidas do time fora: {partidas_fora}\nGOLS MARCADOS')
+    else:       
+        print(f'\nPartidas do time fora: {partidas_fora}')
+        soma_cruza_favor, soma_cruza_contra = sum(lista_cruzamentos_fora_favor), sum(lista_cruzamentos_fora_contra)
+        soma_esc_favor, soma_esc_contra = sum(lista_escanteios_fora) , sum(lista_escanteios_fora_contra)
+        print(f'Cruzamentos do time necessarios para um escanteio: {soma_cruza_favor / soma_esc_favor:.2f} ({soma_cruza_favor / partidas_cruz_fora:.2f} Cruzamentos por jogo) -> {float(soma_cruza_favor / partidas_cruz_fora) / float(soma_cruza_favor / soma_esc_favor):.2f}\n'
+          f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {soma_cruza_contra / soma_esc_contra:.2f} ({soma_cruza_contra / partidas_cruz_fora:.2f} Cruzamentos por jogo) -> {float(soma_cruza_contra / partidas_cruz_fora) / float(soma_cruza_contra / soma_esc_contra):.2f}')
+
+
+        print('\nGOLS MARCADOS')
         
         x = 0.5
         for i in range(5):
