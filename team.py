@@ -94,12 +94,12 @@ def last_games(ide, time, home):
     json_data = json.loads(html.text)
     try: 
         keys = json_data['events']
-        partida_afastes, partidas_cruz_casa, partidas_cruz_fora, partidas_casa, partidas_fora, gols_soma, escanteios_soma, amarelos_soma, partidas_soma, chutes_soma, impedimentos_soma = 0, 0 ,0 ,0 ,0, 0, 0, 0, 0, 0, 0
-        partida_cruzamentos,partida_escanteios, partida_amarelos, partida_impedimentos, partida_chutes, vitorias, empates, derrotas, gols_feitos, gols_sofridos = 0, 0, 0 ,0, 0, 0, 0, 0, 0,0
+        chute_block_casa, chutes_block_casa_cedidos,  chute_block_away, chute_block_away_cedidos, chutes_soma_casa, chutes_soma_casa_cedidos ,chutes_soma_away ,chutes_soma_away_cedidos = 0, 0, 0, 0, 0, 0, 0, 0
+        partidas_cruz_casa, partidas_cruz_fora, partidas_casa, partidas_fora, gols_soma, escanteios_soma, amarelos_soma, partidas_soma, chutes_soma, impedimentos_soma = 0, 0 ,0 ,0 ,0, 0, 0, 0, 0, 0
+        partida_cruzamentos,partida_escanteios, partida_amarelos, partida_impedimentos, partida_chutes_target, partida_chutes_block, vitorias, empates, derrotas, gols_feitos, gols_sofridos = 0, 0, 0 ,0, 0, 0, 0, 0, 0,0,0
         lista_escanteios, lista_gols, lista_amarelos,lista_escanteios_casa, lista_gols_casa, lista_escanteios_fora, lista_gols_fora,lista_gols_sofridos_casa, lista_gols_sofridos_fora  = [], [], [],[],[],[],[],[],[]
         lista_cruzamentos_favor, lista_cruzamentos_contra, lista_escanteios_casa_contra, lista_escanteios_fora_contra, lista_cruzamentos_casa_favor,lista_cruzamentos_casa_contra = [], [], [], [],[],[]
-        lista_cruzamentos_fora_favor, lista_cruzamentos_fora_contra, lista_afastes_favor, lista_afastes_contra, lista_afastes_favor_casa, lista_afastes_favor_fora = [], [],[],[],[],[]
-        lista_afastes_contra_casa, lista_afastes_contra_fora = [], []
+        lista_cruzamentos_fora_favor, lista_cruzamentos_fora_contra,  = [], []
         for i in keys:
             
             nome_torneio = i['tournament']['name']
@@ -155,7 +155,7 @@ def last_games(ide, time, home):
                     
             for x in stats[0]['groups']:
                 for y in x['statisticsItems']:
-                    if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards' or y['name'] == 'Shots on target' or y['name'] == 'Blocked shots' or y['name'] == 'Offsides' or y['name'] =='Crosses' or y['name'] =='Clearances':
+                    if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards' or y['name'] == 'Shots on target' or y['name'] == 'Blocked shots' or y['name'] == 'Offsides' or y['name'] =='Crosses':
                         
                         #print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
                         if y['name'] =='Crosses':
@@ -197,13 +197,23 @@ def last_games(ide, time, home):
                                 amarelos_soma += int(y['away'])
                             lista_amarelos.append(int(y['home']) + int(y['away']))
                                                     
-                        elif y['name'] == 'Shots on target' or y['name'] == 'Blocked shots':
-                            partida_chutes += 1
+                        elif y['name'] == 'Shots on target' :
+                            partida_chutes_target += 1
                             if time_casa == time:
-                                chutes_soma += int(y['home'])
+                                chutes_soma_casa += int(y['home'])
+                                chutes_soma_casa_cedidos += int(y['away'])
                             else:
-                                chutes_soma += int(y['away'])
-                                
+                                chutes_soma_away += int(y['away'])
+                                chutes_soma_away_cedidos += int(y['home'])
+                        elif y['name'] == 'Blocked shots':
+                            partida_chutes_block += 1
+                            if time_casa == time:
+                                chute_block_casa += int(y['home'])
+                                chutes_block_casa_cedidos += int(y['away'])
+                            else:
+                                chute_block_away += int(y['away'])
+                                chute_block_away_cedidos += int(y['home'])
+                                pass
                         elif y['name'] == 'Offsides':
                             partida_impedimentos += 1
                             if time_casa == time:
@@ -211,18 +221,7 @@ def last_games(ide, time, home):
                             else:
                                 impedimentos_soma += int(y['away'])
                             
-                        elif y['name'] == 'Clearances':
-                            partida_afastes += 1
-                            if time_casa == time:
-                                lista_afastes_favor.append(int(y['home']))
-                                lista_afastes_favor_casa.append( int(y['home']))
-                                lista_afastes_contra.append( int(y['away']))
-                                lista_afastes_contra_casa.append( int(y['away']))
-                            else:
-                                lista_afastes_favor.append(int(y['away']))
-                                lista_afastes_favor_fora.append( int(y['away']))
-                                lista_afastes_contra.append( int(y['home']))
-                                lista_afastes_contra_fora.append( int(y['home']))
+                        
 
 
 
@@ -235,19 +234,23 @@ def last_games(ide, time, home):
     gols_soma = gols_feitos + gols_sofridos
     print(f'\n{time} - Nas últimas {partidas_soma} Partidas \n'
     f'{time} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n\nPartidas do time: {partidas_soma} ')
-    soma_afastes = sum(lista_afastes_favor)
-    soma_afastes /= partida_afastes
-    soma_afastes_contra = sum(lista_afastes_contra)
-    soma_afastes_contra /= partida_afastes
-    soma_cruza_favor, soma_cruza_contra = sum(lista_cruzamentos_favor), sum(lista_cruzamentos_contra)
-    soma_esc_favor, soma_esc_contra = sum(lista_escanteios_casa) + sum(lista_escanteios_fora), sum(lista_escanteios_casa_contra) + sum(lista_escanteios_fora_contra)
-    cruz_para_esc, cruz_para_esc_adv, media_esc_, media_esc_adv = soma_cruza_favor / soma_esc_favor , soma_cruza_contra / soma_esc_contra, float(soma_cruza_favor / partida_cruzamentos) / float(soma_cruza_favor / soma_esc_favor), float(soma_cruza_contra / partida_cruzamentos) / float(soma_cruza_contra / soma_esc_contra)
-
-    print(f'Cruzamentos do time necessarios para um escanteio: {cruz_para_esc:.2f} ({soma_cruza_favor / partida_cruzamentos:.2f} Cruzamentos por jogo) -> {media_esc_:.2f}\n'
-          f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {cruz_para_esc_adv:.2f} ({soma_cruza_contra / partida_cruzamentos:.2f} Cruzamentos por jogo) -> {media_esc_adv:.2f}'
-          f'\nEscanteios contra o time baseado nas afastadas e cruzamentos: {((soma_cruza_contra / partida_cruzamentos ) / soma_afastes) / (soma_esc_contra / partida_escanteios) * (soma_afastes):.2f}'
-          f'\nEscanteios a favor do time baseado nas afastadas e cruzamentos: {((soma_cruza_favor / partida_cruzamentos ) / soma_afastes_contra) / (soma_esc_favor / partida_escanteios) * (soma_afastes_contra):.2f}')
-
+    
+    try:
+        soma_cruza_favor1, soma_cruza_contra1 = sum(lista_cruzamentos_favor), sum(lista_cruzamentos_contra)
+        soma_esc_favor, soma_esc_contra = sum(lista_escanteios_casa) + sum(lista_escanteios_fora), sum(lista_escanteios_casa_contra) + sum(lista_escanteios_fora_contra)
+        cruz_para_esc, cruz_para_esc_adv, media_esc_, media_esc_adv = soma_cruza_favor1 / soma_esc_favor , soma_cruza_contra1 / soma_esc_contra, float(soma_cruza_favor1 / partida_cruzamentos) / float(soma_cruza_favor1 / soma_esc_favor), float(soma_cruza_contra1 / partida_cruzamentos) / float(soma_cruza_contra1 / soma_esc_contra)
+    except:
+        pass
+    
+    
+    
+    try:
+        print(f'Cruzamentos do time necessarios para um escanteio: {cruz_para_esc:.2f} ({soma_cruza_favor1 / partida_cruzamentos:.2f} Cruzamentos por jogo) -> {media_esc_:.2f}\n'
+          f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {cruz_para_esc_adv:.2f} ({soma_cruza_contra1 / partida_cruzamentos:.2f} Cruzamentos por jogo) -> {media_esc_adv:.2f}')
+   
+        
+    except:
+        pass
     
     
     
@@ -281,14 +284,14 @@ def last_games(ide, time, home):
         #print(f'Número de ESCANTEIOS do time em casa: {lista_escanteios_casa}\nNúmero de GOLS do time em casa: {lista_gols_casa}\nNúmero de GOLS SOFRIDOS do time em casa: {lista_gols_sofridos_casa}')
         soma_cruza_favor, soma_cruza_contra = sum(lista_cruzamentos_casa_favor), sum(lista_cruzamentos_casa_contra)
         soma_esc_favor, soma_esc_contra = sum(lista_escanteios_casa) , sum(lista_escanteios_casa_contra)
-        soma_afastes = sum(lista_afastes_favor_casa)
-        soma_afastes /= partida_afastes
-        soma_afastes_contra = sum(lista_afastes_contra_casa)
-        soma_afastes_contra /= partida_afastes
-        print(f'Cruzamentos do time necessarios para um escanteio: {soma_cruza_favor / soma_esc_favor:.2f} ({soma_cruza_favor / partidas_cruz_casa:.2f} Cruzamentos por jogo) -> {float(soma_cruza_favor / partidas_cruz_casa) / float(soma_cruza_favor / soma_esc_favor):.2f}\n'
-          f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {soma_cruza_contra / soma_esc_contra:.2f} ({soma_cruza_contra / partidas_cruz_casa:.2f} Cruzamentos por jogo) -> {float(soma_cruza_contra / partidas_cruz_casa) / float(soma_cruza_contra / soma_esc_contra):.2f}'
-          f'\nCortes do time por jogo: {soma_afastes}  para {soma_cruza_contra / partida_cruzamentos:.2f} Cruzamentos do adversário no jogo. Resultando em : {soma_esc_contra / partida_escanteios} Escanteios por jogo')
-
+        cruza_favor_media , cruza_contra_media =  soma_cruza_favor / partidas_cruz_casa, soma_cruza_contra / partidas_cruz_casa
+       
+        try:
+            print(f'Cruzamentos do time necessarios para um escanteio: {soma_cruza_favor / soma_esc_favor:.2f} ({soma_cruza_favor / partidas_cruz_casa:.2f} Cruzamentos por jogo) -> {float(soma_cruza_favor / partidas_cruz_casa) / float(soma_cruza_favor / soma_esc_favor):.2f}\n'
+            f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {soma_cruza_contra / soma_esc_contra:.2f} ({soma_cruza_contra / partidas_cruz_casa:.2f} Cruzamentos por jogo) -> {float(soma_cruza_contra / partidas_cruz_casa) / float(soma_cruza_contra / soma_esc_contra):.2f}')
+ 
+        except:
+            pass
 
 
         
@@ -306,20 +309,21 @@ def last_games(ide, time, home):
             contador =lista_gols_sofridos_casa.count(x) + sum(1 for numero in lista_gols_sofridos_casa if numero > x)
             print(f'-> acima de {x} gols: {contador}')
             x+=1
-        
+        return cruza_favor_media, cruza_contra_media,( soma_cruza_favor / soma_esc_favor), (soma_cruza_contra / soma_esc_contra)
+    
     else:       
         print(f'\nPartidas do time fora: {partidas_fora}')
         soma_cruza_favor, soma_cruza_contra = sum(lista_cruzamentos_fora_favor), sum(lista_cruzamentos_fora_contra)
         soma_esc_favor, soma_esc_contra = sum(lista_escanteios_fora) , sum(lista_escanteios_fora_contra)
-        soma_afastes = sum(lista_afastes_favor_fora)
-        soma_afastes /= partida_afastes
-        soma_afastes_contra = sum(lista_afastes_contra_fora)
-        soma_afastes_contra /= partida_afastes
-
-        print(f'Cruzamentos do time necessarios para um escanteio: {soma_cruza_favor / soma_esc_favor:.2f} ({soma_cruza_favor / partidas_cruz_fora:.2f} Cruzamentos por jogo) -> {float(soma_cruza_favor / partidas_cruz_fora) / float(soma_cruza_favor / soma_esc_favor):.2f}\n'
-          f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {soma_cruza_contra / soma_esc_contra:.2f} ({soma_cruza_contra / partidas_cruz_fora:.2f} Cruzamentos por jogo) -> {float(soma_cruza_contra / partidas_cruz_fora) / float(soma_cruza_contra / soma_esc_contra):.2f}'
-          f'\nCortes do time por jogo: {soma_afastes:.2f}  para {soma_cruza_contra / partida_cruzamentos:.2f} Cruzamentos do adversário no jogo. Resultando em : {soma_esc_contra / partida_escanteios:.2f} Escanteios por jogo')
-
+        cruza_favor_media , cruza_contra_media =  soma_cruza_favor / partidas_cruz_casa, soma_cruza_contra / partidas_cruz_casa
+        
+       
+        
+        try:
+            print(f'Cruzamentos do time necessarios para um escanteio: {soma_cruza_favor / soma_esc_favor:.2f} ({soma_cruza_favor / partidas_cruz_fora:.2f} Cruzamentos por jogo) -> {float(soma_cruza_favor / partidas_cruz_fora) / float(soma_cruza_favor / soma_esc_favor):.2f}\n'
+          f'Cruzamentos do ADVERSARIO necessarios para um escanteio: {soma_cruza_contra / soma_esc_contra:.2f} ({soma_cruza_contra / partidas_cruz_fora:.2f} Cruzamentos por jogo) -> {float(soma_cruza_contra / partidas_cruz_fora) / float(soma_cruza_contra / soma_esc_contra):.2f}')  
+        except:
+          pass
         print('\nGOLS MARCADOS')
         
         x = 0.5
@@ -335,6 +339,10 @@ def last_games(ide, time, home):
             contador =lista_gols_sofridos_fora.count(x) + sum(1 for numero in lista_gols_sofridos_fora if numero > x)
             print(f'-> acima de {x} gols: {contador}')
             x+=1
+        return cruza_favor_media, cruza_contra_media, (soma_cruza_favor / soma_esc_favor), (soma_cruza_contra / soma_esc_contra)
+
+
+
 
 
 def ultimas_headtohead(url):

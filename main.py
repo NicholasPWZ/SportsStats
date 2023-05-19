@@ -80,14 +80,24 @@ print('-' * 20,'ULTIMOS JOGOS','-' * 20)
 print(hometeam)
 #print('Jogos mais recentes por último')
 
-team.last_games(homeid, hometeam, hometeam)
+stats_cruzamento_casa = team.last_games(homeid, hometeam, hometeam)
 
 print('-' * 20)
 
 print(awayteam )
 #print('Jogos mais recentes por último')
 
-team.last_games(awayid, awayteam, hometeam)
+stats_cruzamento_away = team.last_games(awayid, awayteam, hometeam)
+
+print('\n')
+casa_cruza_favor, casa_cruza_contra, casa_cruza_por_esc, casa_cruza_por_esc_c = stats_cruzamento_casa[0], stats_cruzamento_casa[1], stats_cruzamento_casa[2], stats_cruzamento_casa[3]
+away_cruza_favor, away_cruza_contra, away_cruza_por_esc, away_cruza_por_esc_c = stats_cruzamento_away[0], stats_cruzamento_away[1], stats_cruzamento_away[2], stats_cruzamento_away[3]
+print(f'Aproximado número de escanteios da equipe {hometeam} na partida: {(casa_cruza_favor + away_cruza_contra / 2) / (casa_cruza_por_esc + away_cruza_por_esc_c / 2):.2f}')
+
+print(f'Aproximado número de escanteios da equipe {awayteam} na partida: {(away_cruza_favor + casa_cruza_contra / 2) / (away_cruza_por_esc + casa_cruza_por_esc_c / 2):.2f}')
+
+
+
 
 print('\n')
 
