@@ -233,7 +233,8 @@ def last_games(ide, time, home):
         pass              
     gols_soma = gols_feitos + gols_sofridos
     print(f'\n{time} - Nas últimas {partidas_soma} Partidas \n'
-    f'{time} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n\nPartidas do time: {partidas_soma} ')
+    f'{time} venceu {vitorias}, perdeu {derrotas} e empatou {empates} - Marcando {gols_feitos} gols e cedendo {gols_sofridos}\nMédia de gols na partida: {gols_soma / partidas_soma:.2f}\n\nPartidas do time: {partidas_soma}\n '
+    f'Lista de gols totais nas últimas partidas: {lista_gols}')
     
     try:
         soma_cruza_favor1, soma_cruza_contra1 = sum(lista_cruzamentos_favor), sum(lista_cruzamentos_contra)
@@ -285,7 +286,8 @@ def last_games(ide, time, home):
         soma_cruza_favor, soma_cruza_contra = sum(lista_cruzamentos_casa_favor), sum(lista_cruzamentos_casa_contra)
         soma_esc_favor, soma_esc_contra = sum(lista_escanteios_casa) , sum(lista_escanteios_casa_contra)
         cruza_favor_media , cruza_contra_media =  soma_cruza_favor / partidas_cruz_casa, soma_cruza_contra / partidas_cruz_casa
-        print(f'Escanteios a favor nos últimos home games: {lista_escanteios_casa}\nEscanteios a contra nos últimos home games: {lista_escanteios_casa_contra}')
+        print(f'Escanteios a favor nos últimos home games: {lista_escanteios_casa}\nEscanteios a contra nos últimos home games: {lista_escanteios_casa_contra}\n'
+        f'Gols a favor nos últimos home games: {lista_gols_casa}\nGols SOFRIDOS nos últimos home games: {lista_gols_sofridos_casa}')
         
         try:
             print(f'Cruzamentos do time necessarios para um escanteio: {soma_cruza_favor / soma_esc_favor:.2f} ({soma_cruza_favor / partidas_cruz_casa:.2f} Cruzamentos por jogo) -> {float(soma_cruza_favor / partidas_cruz_casa) / float(soma_cruza_favor / soma_esc_favor):.2f}\n'
@@ -317,7 +319,8 @@ def last_games(ide, time, home):
         soma_cruza_favor, soma_cruza_contra = sum(lista_cruzamentos_fora_favor), sum(lista_cruzamentos_fora_contra)
         soma_esc_favor, soma_esc_contra = sum(lista_escanteios_fora) , sum(lista_escanteios_fora_contra)
         cruza_favor_media , cruza_contra_media =  soma_cruza_favor / partidas_cruz_casa, soma_cruza_contra / partidas_cruz_casa
-        print(f'Escanteios a favor nos últimos away games: {lista_escanteios_fora}\nEscanteios a contra nos últimos home games: {lista_escanteios_fora_contra}')
+        print(f'Escanteios a favor nos últimos away games: {lista_escanteios_fora}\nEscanteios a contra nos últimos home games: {lista_escanteios_fora_contra}\n'
+        f'Gols a favor nos últimos away games: {lista_gols_fora}\nGols SOFRIDOS nos últimos away games: {lista_gols_sofridos_fora}')
        
         
         try:
