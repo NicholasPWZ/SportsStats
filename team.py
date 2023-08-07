@@ -151,13 +151,13 @@ def last_games(ide, time, home):
                 if gols_away < gols_casa:
                     derrotas += 1
             lista_gols.append(int(gols_casa) + int(gols_away))
-            #print('-' * 15,'\n',nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
+            print('-' * 15,'\n',nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
                     
             for x in stats[0]['groups']:
                 for y in x['statisticsItems']:
                     if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards' or y['name'] == 'Shots on target' or y['name'] == 'Blocked shots' or y['name'] == 'Offsides' or y['name'] =='Crosses':
                         
-                        #print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
+                        print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
                         if y['name'] =='Crosses':
                             partida_cruzamentos += 1
                             numc = y['home'].split('/')
