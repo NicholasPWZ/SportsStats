@@ -151,13 +151,13 @@ def last_games(ide, time, home):
                 if gols_away < gols_casa:
                     derrotas += 1
             lista_gols.append(int(gols_casa) + int(gols_away))
-            #print('-' * 15,'\n',nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
+            print('-' * 15,'\n' * 2,nome_torneio,'||', time_casa, '-', gols_casa,'X',gols_away,'-', time_away, '\n')
                     
             for x in stats[0]['groups']:
                 for y in x['statisticsItems']:
-                    if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards' or y['name'] == 'Shots on target' or y['name'] == 'Blocked shots' or y['name'] == 'Offsides' or y['name'] =='Crosses':
+                    if y['name'] == 'Corner kicks' or y['name'] == 'Yellow cards' or y['name'] == 'Shots on target' or y['name'] == 'Blocked shots' or y['name'] == 'Offsides' or y['name'] =='Crosses' or y['name'] =='Ball possession' or y['name'] =='Shots off target' or y['name'] =='Blocked shots' or y['name'] ==' Big chances' or y['name'] =='Blocked shots' or y['name'] =='Big chances missed' or y['name'] =='Passes' or y['name'] =='Aerials won' or y['name'] =='Clearances' or y['name'] =='Shots inside box' or y['name'] =='Shots outside box' or y['name'] =='Long balls' or y['name'] =='Dribbles':
                         
-                        #print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
+                        print (y['name'],'-' ,time_casa,'-', y['home'], 'X', y['away'],'-', time_away)
                         if y['name'] =='Crosses':
                             partida_cruzamentos += 1
                             numc = y['home'].split('/')
@@ -177,7 +177,7 @@ def last_games(ide, time, home):
                                 lista_cruzamentos_favor.append(int(numf[0]))
                                 lista_cruzamentos_contra.append(int(numc[0]))
 
-                       
+                        
                         elif y['name'] == 'Corner kicks':
                             partida_escanteios += 1
                             if time_casa == time:
@@ -228,7 +228,10 @@ def last_games(ide, time, home):
 
 
                     else:
+             
                         continue
+            print('\n' * 3) 
+
     except:
         pass              
     gols_soma = gols_feitos + gols_sofridos
